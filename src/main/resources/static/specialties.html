@@ -1,0 +1,52 @@
+<div layout="column" layout-align="space-between none" layout-fill>
+  <div layout="column">
+    <div layout="row" >
+      <md-input-container flex>
+        <label>Search by name</label>
+        <input type="search" debounce="1200" immediate="false" ng-model="queryText" ng-change="resetPage()" aria-label="Query"/>
+      </md-input-container>
+      
+      <md-button class="md-icon-button" aria-label="Previous" ng-click="toggleSortDirection()">
+        <md-icon>{{ sortIconName }}</md-icon>
+      </md-button>
+    </div>
+
+    <md-list flex layout-align="space-around none">
+      <md-list-item class="md-2-line" ng-repeat="specialty in specialties  | orderBy:'name':sortDirectionUi ">
+        <div class="md-list-item-text" layout="column">
+          <h3>{{ specialty.name }}</h3>
+          <h4>
+            <span flex ng-repeat="specialty in physician.specialties">{{ specialty.name }} </span>
+          </h4>
+        </div>
+
+        <md-button class="md-icon-button" aria-label="Edit specialty" ng-click="editSpecialty($event, specialty)">
+          <md-icon>edit</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Delete specialty" ng-click="deleteSpecialty($event, specialty)">
+          <md-icon>delete</md-icon>
+        </md-button>
+      </md-list-item>
+    </md-list>
+
+    <div layout="row"  layout-align="center center" ng-if="totalPages > 0">
+      <md-button class="md-icon-button" aria-label="Previous" ng-click="navigatePrevious()" ng-disabled="page <= 0">
+        <md-icon>navigate_before</md-icon>
+      </md-button>
+
+      <span>{{ page + 1 + ' / ' + totalPages }}</span>
+
+      <md-button class="md-icon-button" aria-label="Next" ng-click="navigateNext()" ng-disabled="page >= (totalPages - 1)">
+        <md-icon>navigate_next</md-icon>
+      </md-button>
+    </div>    
+  </div>
+
+  <div layout="row" layout-align="center end" ng-if="!editingSpecialty">
+    <md-button class="md-fab md-primary" aria-label="New specialty" ng-click="createSpecialty()">
+      <md-icon>add_circle_outline</md-icon>
+    </md-button>
+  </div>
+
+  <edit-specialty ng-if="editingSpecialty" specialty="currentSpecialty"></edit-specialty>
+</div>

@@ -1,0 +1,60 @@
+<form ng-cloak name="physicianForm" layout="column" layout-align="center center">
+  <div layout-xs="column" layout="row" layout-padding layout-align="space-around center">
+    <md-input-container>
+      <label>Name</label>
+      <input required name="physicianName" ng-model="physician.name">
+      <div ng-messages="physicianForm.physicianName.$error">
+        <div ng-message="required">This is required.</div>
+      </div>
+    </md-input-container>
+
+    <md-input-container>
+      <label>Phone number</label>
+      <input required name="physicianPhone" ng-model="physician.phone">
+      <div ng-messages="physicianForm.physicianPhone.$error">
+        <div ng-message="required">This is required.</div>
+      </div>
+    </md-input-container>
+  </div>
+
+  <div layout-xs="column" layout="row" layout-padding layout-align="space-around center">
+    <md-input-container>
+      <label>CPF</label>
+      <input required name="physicianCpf" ng-model="physician.cpf" ng-cpf>
+      <div ng-messages="physicianForm.physicianCpf.$error">
+        <div ng-message="required">This is required.</div>
+        <div ng-message="ng-cpf">Invalid CPF.</div>
+      </div>
+    </md-input-container>
+
+    <md-input-container>
+      <label>CRM</label>
+      <input required name="physicianCrm" ng-model="physician.crm">
+      <div ng-messages="physicianForm.physicianCrm.$error">
+        <div ng-message="required">This is required.</div>
+      </div>
+    </md-input-container>
+  </div>
+
+  <div layout="row" layout-padding layout-align="space-around center">
+    <md-chips flex md-autocomplete-snap ng-model="physician.specialties" md-require-match="true">
+      <md-autocomplete md-items="specialty in filterSpecialties(specialtyQuery)" 
+                        md-item-text="specialty.name" md-search-text="specialtyQuery" placeholder="Specialties">
+        <md-item-template>
+          <span md-highlight-text="specialtyQuery">{{specialty.name}}</span>
+        </md-item-template>
+      </md-autocomplete>
+      <md-chip-template>
+        <span>
+          <strong>{{ $chip.name }}</strong>
+        </span>
+      </md-chip-template>
+    </md-chips>
+  </div>
+
+  <md-dialog-actions layout="row">
+    <span flex></span>
+    <md-button ng-click="cancel()" aria-label="Cancel">Cancel</md-button>
+    <md-button ng-click="confirm()" aria-label="Confirm" ng-disabled="physicianForm.$invalid" class="md-secondary">Ok</md-button>
+  </md-dialog-actions>
+</form>

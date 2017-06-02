@@ -1,0 +1,10 @@
+insert into specialty values (1, 'psychiatrist');
+insert into specialty values (2, 'orthopedician');
+insert into specialty values (3, 'neurologist');
+insert into specialty values (4, 'obstetrician');
+insert into specialty values (5, 'urologist');
+insert into specialty values (6, 'endocrinologist');
+insert into specialty values (7, 'cardiologist');
+insert into specialty values (8, 'oncologist');
+insert into specialty values (9, 'proctologist');
+insert into specialty values (10, 'dentist');
