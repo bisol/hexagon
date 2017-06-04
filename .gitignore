@@ -3,3 +3,4 @@
 target/
 .classpath
 src/main/resources/static/node_modules/
+src/main/resources/static/npm-debug.log

@@ -51,7 +51,8 @@ The web app source is in src/main/resources/static/
 * Use a packaging system, such as Webpack
 * Create a git repository for the web app, and include it in the backent 
   through a git submodule  
-* Move the pagination controls to it's own directive, or use a ready made lib.
+* Move the pagination controls to it's own directive, or use a ready made 
+  lib (couldn't find one ready for material design).
 * Add icons to the listings (phone, etc).
 * Maybe force the "create" FAB to the bottom of the page
 * Create a "details" page for specialties, since it's physician list can become
