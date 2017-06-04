@@ -6,9 +6,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.ConstraintViolationException;
 
 import org.hibernate.validator.constraints.br.CPF;
 
+/**
+ * Model for patient entity
+ * @author bisol
+ *
+ */
 @Entity
 @Table(name="person")
 public class Person {
@@ -56,6 +62,10 @@ public class Person {
 		return cpf;
 	}
 
+	/**
+	 * @throws ConstraintViolationException if values is not a valid CPF  
+	 * @param cpf
+	 */
 	public void setCpf(String cpf) {
 		this.cpf = cpf;
 	}

@@ -1,10 +1,17 @@
-/*
-Physician edition.
-Basicaly the same as patient edition, but with extra CRM & Specialty fields.
-Edits the given physician and broadcasts result as an event.
-*/
 (function() {
   'use strict';
+  /**
+    <edit-physician> directive: provides a form for creastion & edition of patients,
+    with cancel/ok buttons.
+    Emits event 'hexagon-physician-edit-cancel' on cancel and
+    'hexagon-physician-edit-confirm' on confirm.
+    This directive changes the input physician, if this is not desired, pass it a
+    copy of the original object (eg angular.copy).
+
+    examples:
+      Create physician: <edit-physician physician="{}" specialties="ctrl.specialties">
+      Edit physician: <edit-physician physician="ctrl.physician" specialties="ctrl.specialties">
+  */
   angular.module('hexagon')
   .directive('editPhysician', [function($http) {
     return {
@@ -14,7 +21,7 @@ Edits the given physician and broadcasts result as an event.
         physician: '=',
         specialties: '='
       },
-      templateUrl: 'edit-physician.html',
+      templateUrl: '../templates/edit-physician.html',
       link: function (scope) {
         scope.specialtyQuery = ''
         scope.physician.specialties = scope.physician.specialties || []

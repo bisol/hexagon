@@ -18,9 +18,14 @@ interface to the database. The only notable features are:
 ** This means the web app must make additional requests to list a physician's 
    specialties, and a specialty associated physicians.
 
+### Tests
+
+Running "mvn package" will run the tests
+
 ### Possible improvements
 
 * Replace the Spring Boot generated REST interface with a service facade
+* Use inheritance to make Physician extend Person 
 
 ## Angular web app
 

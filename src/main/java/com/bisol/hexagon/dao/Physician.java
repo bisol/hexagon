@@ -10,9 +10,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.ConstraintViolationException;
 
 import org.hibernate.validator.constraints.br.CPF;
 
+/**
+ * Model for physician entity
+ * @author bisol
+ *
+ */
 @Entity
 @Table(name="physician")
 public class Physician {
@@ -76,6 +82,10 @@ public class Physician {
 	public String getCpf() {
 		return cpf;
 	}
+	/**
+	 * @throws ConstraintViolationException if values is not a valid CPF  
+	 * @param cpf
+	 */
 	public void setCpf(String cpf) {
 		this.cpf = cpf;
 	}

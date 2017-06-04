@@ -1,23 +1,27 @@
 (function() {
   'use strict';
+  /**
+    <specialties> directive: displays a sortable list of specialties, a query box
+    and create/edit controls.
+  */
   angular.module('hexagon')
   .directive('specialties', ['$http', '$mdDialog', function($http, $mdDialog) {
     return {
       restrict: 'E',
       replace: false,
-      templateUrl: 'specialties.html',
+      templateUrl: '../templates/specialties.html',
       link: function (scope) {
-        scope.editingSpecialty = false
-        scope.page = 0
-        scope.specialties = []
-        scope.querying = false
-        scope.queryText = ''
-        scope.sort = 'name'
-        scope.sortDirection = 'asc'
-        scope.sortDirectionUi = false // false == asc, true == reverse
+        scope.editingSpecialty = false  // togle FAB
+        scope.page = 0                  // pagination controls
+        scope.specialties = []          // specialties list
+        scope.querying = false          // lading animation control
+        scope.queryText = ''            // patient query text
+        scope.sort = 'name'             // sorting field
+        scope.sortDirection = 'asc'     // sort direction for REST query
+        scope.sortDirectionUi = false   // false == asc, true == reverse
         scope.sortIconName = 'keyboard_arrow_up'
-        scope.totalElements = 0
-        scope.totalPages = 0
+        scope.totalElements = 0         // pagination controls
+        scope.totalPages = 0            // pagination controls
 
         scope.toggleSortDirection = function () {
           if (scope.sortDirection === 'asc') {
@@ -69,6 +73,11 @@
           querySpecialties()
         }
 
+        /**
+          Queries backend for specialties. Chooses appropriate HTTP route and query
+          atring based on sorting controls & query text. This will populate each 
+          specialty's phydician in a separete reques (specialty query is lazy)
+        */
         function querySpecialties (pageDirection) {
           scope.querying = true
           var url = '/specialties?'
@@ -120,22 +129,31 @@
           })
           .catch(function(error) {
             scope.querying = false
-            $mdDialog.show($mdDialog.alert().title(':(').textContent('There was an error fetching physicians of specialty ' + specialty.name).ok('Ok'))
+            $mdDialog.show($mdDialog.alert().title(':(')
+            .textContent('There was an error fetching physicians of specialty ' + specialty.name).ok('Ok'))
           })
         }
 
+        /**
+          handle <edit-specialty> 'cancel' event
+        */
         scope.$on('hexagon-specialty-edit-cancel', function () {
           scope.editingSpecialty = false
         })
 
+        /**
+          handle <edit-specialty> 'confirm' event
+        */
         scope.$on('hexagon-specialty-edit-confirm', function (ev, specialty) {
           scope.editingSpecialty = false
           scope.querying = true
 
           var promise
           if (specialty._links) {
+            // editing object from tjhe back end
             promise = $http.put(specialty._links.self.href, specialty)
           } else {
+            // new object
             promise = $http.post('/specialties', specialty)
           }
 

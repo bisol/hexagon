@@ -10,6 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+/**
+ * Model for specialty entity
+ * @author bisol
+ *
+ */
 @Entity
 @Table(name="specialty")
 public class Specialty {

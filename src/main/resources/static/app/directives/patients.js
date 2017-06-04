@@ -1,32 +1,38 @@
 (function() {
   'use strict';
+  /**
+    <patients> directive: displays a sortable list of patients, a query box
+    and create/edit controls.
+  */
   angular.module('hexagon')
-  .directive('patients', ['$http', '$mdDialog', function($http, $mdDialog) {
+  .directive('patients', ['$http', '$mdDialog', 'Patients', function($http, $mdDialog, Patients) {
     return {
       restrict: 'E',
       replace: false,
-      templateUrl: 'patients.html',
+      templateUrl: '../templates/patients.html',
       link: function (scope) {
-        scope.editingPatient = false
-        scope.page = 0
-        scope.patients = []
-        scope.querying = false
-        scope.queryText = ''
-        scope.sort = 'name'
-        scope.sortDirection = 'asc'
-        scope.sortDirectionUi = false // false == asc, true == reverse
+        scope.editingPatient = false  // togle FAB
+        scope.page = 0                // pagination controls
+        scope.patients = []           // patient list
+        scope.querying = false        // lading animation control
+        scope.queryText = ''          // patient query text
+        scope.sort = {
+          field: 'name',              // sorting field
+          direction: 'asc',           // sort direction for REST query
+          directionUi: false          // sort direction for UI list -> false == asc, true == reverse
+        }
         scope.sortIconName = 'keyboard_arrow_up'
-        scope.totalElements = 0
-        scope.totalPages = 0
+        scope.totalElements = 0       // pagination controls
+        scope.totalPages = 0          // pagination controls
 
         scope.toggleSortDirection = function () {
-          if (scope.sortDirection === 'asc') {
-            scope.sortDirection = 'desc'
-            scope.sortDirectionUi = true
+          if (scope.sort.direction === 'asc') {
+            scope.sort.direction = 'desc'
+            scope.sort.directionUi = true
             scope.sortIconName = 'keyboard_arrow_down'
           } else {
-            scope.sortDirection = 'asc'
-            scope.sortDirectionUi = false
+            scope.sort.direction = 'asc'
+            scope.sort.directionUi = false
             scope.sortIconName = 'keyboard_arrow_up'
           }
           queryPatients(0)
@@ -39,7 +45,7 @@
 
         scope.deletePatient = function (ev, item) {
           scope.querying = true
-          $http.delete(item._links.self.href)
+          Patients.delete(item)
           .then(function(response) {
             scope.querying = false
             queryPatients(0)
@@ -69,28 +75,27 @@
           queryPatients()
         }
 
+        /**
+          Queries backend for patients. Chooses appropriate HTTP route and query
+          atring based on sorting controls & query text
+        */
         function queryPatients (pageDirection) {
           scope.querying = true
-          var url = '/persons?'
-          if (scope.queryText) {
-            url += '/persons/search/findByNameContaining?name=' + scope.queryText + '&'
-          }
-
-          url += "size=5"
-
+          var newPage = 0
           if (typeof pageDirection === 'number') {
-            var newPage = scope.page + pageDirection
+            newPage = scope.page + pageDirection
             newPage = Math.min(newPage, scope.totalPages - 1)
             newPage = Math.max(0, newPage)
-            url += '&page=' + newPage
-          } else {
-            url += '&page=0'
           }
 
-          url += '&sort=' + scope.sort + ',' + scope.sortDirection
+          var patientsPromise
+          if (scope.queryText) {
+            patientsPromise = Patients.findByName(scope.queryText, newPage, sort)
+          } else {
+            patientsPromise = Patients.find(newPage, sort)
+          }
 
-          $http.get(url)
-          .then(function(response) {
+          patientsPromise.then(function(response) {
             if (response.data) {
               scope.patients = response.data._embedded.persons
               scope.totalPages = response.data.page.totalPages
@@ -105,23 +110,30 @@
           })
         }
 
+        /**
+          handle <edit-patient> 'cancel' event
+        */
         scope.$on('hexagon-patient-edit-cancel', function () {
           scope.editingPatient = false
         })
 
-
+        /**
+          handle <edit-patient> 'confirm' event
+        */
         scope.$on('hexagon-patient-edit-confirm', function (ev, patient) {
           scope.editingPatient = false
           scope.querying = true
 
-          var promise
+          var patientsPromise
           if (patient._links) {
-            promise = $http.put(patient._links.self.href, patient)
-          } else {
-            promise = $http.post('/persons', patient)
+          // patient came from the back end
+            patientsPromise = Patients.update(patient)
+          } else {  
+            // new patient
+            patientsPromise = Patients.create(patient)
           }
 
-          promise.then(function(response) {
+          patientsPromise.then(function(response) {
             scope.querying = false
             queryPatients(0)
           })
