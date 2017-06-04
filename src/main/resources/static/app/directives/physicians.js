@@ -5,33 +5,35 @@
     and create/edit controls.
   */
   angular.module('hexagon')
-  .directive('physicians', ['$http', '$mdDialog', function($http, $mdDialog) {
+  .directive('physicians', ['$http', '$mdDialog', 'Physicians', 'Specialties', function($http, $mdDialog, Physician, Specialties) {
     return {
       restrict: 'E',
       replace: false,
-      templateUrl: '../templates/physicians.html',
+      templateUrl: 'app/templates/physicians.html',
       link: function (scope) {
         scope.editingPhysician = false // togle FAB
         scope.page = 0                 // pagination controls
         scope.physicians = []          // physicians list
         scope.querying = false         // lading animation control
         scope.queryText = ''           // patient query text
-        scope.sort = 'name'            // sorting field
-        scope.sortDirection = 'asc'    // sort direction for REST query
-        scope.sortDirectionUi = false  // false == asc, true == reverse
-        scope.sortIconName = 'keyboard_arrow_up'
+        scope.sort = {
+          field: 'name',               // sorting field
+          direction: 'asc',            // sort direction for REST query
+          directionUi: false,           // sort direction for UI list -> false == asc, true == reverse
+          iconName: 'keyboard_arrow_up'
+        }
         scope.specialties = []         // physician specialties
         scope.totalElements = 0        // pagination controls
         scope.totalPages = 0           // pagination controls
 
         scope.toggleSortDirection = function () {
-          if (scope.sortDirection === 'asc') {
-            scope.sortDirection = 'desc'
-            scope.sortDirectionUi = true
+          if (scope.sort.direction === 'asc') {
+            scope.sort.direction = 'desc'
+            scope.sort.directionUi = true
             scope.sortIconName = 'keyboard_arrow_down'
           } else {
-            scope.sortDirection = 'asc'
-            scope.sortDirectionUi = false
+            scope.sort.direction = 'asc'
+            scope.sort.directionUi = false
             scope.sortIconName = 'keyboard_arrow_up'
           }
           queryPhysicians(0)
@@ -44,7 +46,7 @@
 
         scope.deletePhysician = function (ev, item) {
           scope.querying = true
-          $http.delete(item._links.self.href)
+          Physician.delete(item)
           .then(function(response) {
             scope.querying = false
             queryPhysicians(0)
@@ -81,26 +83,21 @@
         */
         function queryPhysicians (pageDirection) {
           scope.querying = true
-          var url = '/physicians?'
-          if (scope.queryText) {
-            url += '/physicians/search/findByNameContaining?name=' + scope.queryText + '&'
-          }
-
-          url += "size=5"
-
+          var newPage = 0
           if (typeof pageDirection === 'number') {
-            var newPage = scope.page + pageDirection
+            newPage = scope.page + pageDirection
             newPage = Math.min(newPage, scope.totalPages - 1)
             newPage = Math.max(0, newPage)
-            url += '&page=' + newPage
-          } else {
-            url += '&page=0'
           }
 
-          url += '&sort=' + scope.sort + ',' + scope.sortDirection
+          var physiciansPromise
+          if (scope.queryText) {
+            physiciansPromise = Physician.findByName(scope.queryText, newPage, scope.sort)
+          } else {
+            physiciansPromise = Physician.find(newPage, scope.sort)
+          }
 
-          $http.get(url)
-          .then(function(response) {
+          physiciansPromise.then(function(response) {
             if (response.data) {
               scope.physicians = response.data._embedded.physicians
               scope.physicians.forEach(fetchPhysicianSpecialties)
@@ -118,16 +115,7 @@
         }
 
         function fetchPhysicianSpecialties (physician) {
-          if (!physician._links || !physician._links.specialties) return
-
-          $http.get(physician._links.specialties.href)
-          .then(function(response) {
-            if (response.data._embedded && response.data._embedded.specialties) {
-              physician.specialties = response.data._embedded.specialties
-            } else {
-              physician.specialties = []
-            }
-          })
+          Physician.populateSpecialties(physician)
           .catch(function(error) {
             scope.querying = false
             $mdDialog.show($mdDialog.alert().title(':(')
@@ -149,23 +137,16 @@
           scope.editingPhysician = false
           scope.querying = true
 
-          // fix object format for API
-          if (physician.specialties) {
-            physician.specialties = physician.specialties.map(function (specialty) {
-              return specialty._links.self.href
-            })
-          }
-
-          var promise
+          var physiciansPromise
           if (physician._links) {
             // physician came from the back end
-            promise = $http.put(physician._links.self.href, physician)
+            physiciansPromise = Physician.update(physician)
           } else {
             // new physician
-            promise = $http.post('/physicians', physician)
+            physiciansPromise = Physician.create(physician)
           }
 
-          promise.then(function(response) {
+          physiciansPromise.then(function(response) {
             scope.querying = false
             queryPhysicians(0)
           })
@@ -177,15 +158,14 @@
 
         queryPhysicians()
 
-        $http.get('/specialties')
-        .then(function(response) {
+        Specialties.all().then(function(response) {
           if (response.data) {
             scope.specialties = response.data._embedded.specialties
           }
         })
         .catch(function(error) {
           scope.querying = false
-          $mdDialog.show($mdDialog.alert().title(':(').textContent('There was an error'))
+          $mdDialog.show($mdDialog.alert().title(':(').textContent('There was an error').ok('Ok'))
         })
       }
     }

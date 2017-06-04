@@ -20,7 +20,7 @@
       scope: {
         specialty: '='
       },
-      templateUrl: '../templates/edit-specialty.html',
+      templateUrl: 'app/templates/edit-specialty.html',
       link: function (scope) {
         scope.cancel = function () {
           scope.$emit('hexagon-specialty-edit-cancel')

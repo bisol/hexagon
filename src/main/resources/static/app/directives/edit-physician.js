@@ -21,7 +21,7 @@
         physician: '=',
         specialties: '='
       },
-      templateUrl: '../templates/edit-physician.html',
+      templateUrl: 'app/templates/edit-physician.html',
       link: function (scope) {
         scope.specialtyQuery = ''
         scope.physician.specialties = scope.physician.specialties || []

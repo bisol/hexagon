@@ -20,7 +20,7 @@
       scope: {
         patient: '='
       },
-      templateUrl: '../templates/edit-patient.html',
+      templateUrl: 'app/templates/edit-patient.html',
       link: function (scope) {
         scope.cancel = function () {
           scope.$emit('hexagon-patient-edit-cancel')

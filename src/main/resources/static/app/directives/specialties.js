@@ -5,32 +5,34 @@
     and create/edit controls.
   */
   angular.module('hexagon')
-  .directive('specialties', ['$http', '$mdDialog', function($http, $mdDialog) {
+  .directive('specialties', ['$http', '$mdDialog', 'Specialties', function($http, $mdDialog, Specialties) {
     return {
       restrict: 'E',
       replace: false,
-      templateUrl: '../templates/specialties.html',
+      templateUrl: 'app/templates/specialties.html',
       link: function (scope) {
         scope.editingSpecialty = false  // togle FAB
         scope.page = 0                  // pagination controls
         scope.specialties = []          // specialties list
         scope.querying = false          // lading animation control
         scope.queryText = ''            // patient query text
-        scope.sort = 'name'             // sorting field
-        scope.sortDirection = 'asc'     // sort direction for REST query
-        scope.sortDirectionUi = false   // false == asc, true == reverse
-        scope.sortIconName = 'keyboard_arrow_up'
+        scope.sort = {
+          field: 'name',                // sorting field
+          direction: 'asc',             // sort direction for REST query
+          directionUi: false,           // sort direction for UI list -> false == asc, true == reverse
+          iconName: 'keyboard_arrow_up'
+        }
         scope.totalElements = 0         // pagination controls
         scope.totalPages = 0            // pagination controls
 
         scope.toggleSortDirection = function () {
-          if (scope.sortDirection === 'asc') {
-            scope.sortDirection = 'desc'
-            scope.sortDirectionUi = true
+          if (scope.sort.direction === 'asc') {
+            scope.sort.direction = 'desc'
+            scope.sort.directionUi = true
             scope.sortIconName = 'keyboard_arrow_down'
           } else {
-            scope.sortDirection = 'asc'
-            scope.sortDirectionUi = false
+            scope.sort.direction = 'asc'
+            scope.sort.directionUi = false
             scope.sortIconName = 'keyboard_arrow_up'
           }
           querySpecialties(0)
@@ -43,7 +45,7 @@
 
         scope.deleteSpecialty = function (ev, item) {
           scope.querying = true
-          $http.delete(item._links.self.href)
+          Specialties.delete(item)
           .then(function(response) {
             scope.querying = false
             querySpecialties(0)
@@ -80,26 +82,21 @@
         */
         function querySpecialties (pageDirection) {
           scope.querying = true
-          var url = '/specialties?'
-          if (scope.queryText) {
-            url += '/specialties/search/findByNameContaining?name=' + scope.queryText + '&'
-          }
-
-          url += "size=5"
-
+          var newPage = 0
           if (typeof pageDirection === 'number') {
-            var newPage = scope.page + pageDirection
+            newPage = scope.page + pageDirection
             newPage = Math.min(newPage, scope.totalPages - 1)
             newPage = Math.max(0, newPage)
-            url += '&page=' + newPage
-          } else {
-            url += '&page=0'
           }
 
-          url += '&sort=' + scope.sort + ',' + scope.sortDirection
+          var specialtiesPromise
+          if (scope.queryText) {
+            specialtiesPromise = Specialties.findByName(scope.queryText, newPage, scope.sort)
+          } else {
+            specialtiesPromise = Specialties.find(newPage, scope.sort)
+          }
 
-          $http.get(url)
-          .then(function(response) {
+          specialtiesPromise.then(function(response) {
             if (response.data) {
               scope.specialties = response.data._embedded.specialties
               scope.specialties.forEach(fetchSpecialtyPhysicians)
@@ -117,16 +114,7 @@
         }
 
         function fetchSpecialtyPhysicians (specialty) {
-          if (!specialty._links || !specialty._links.physicians) return
-
-          $http.get(specialty._links.physicians.href)
-          .then(function(response) {
-            if (response.data._embedded && response.data._embedded.physicians) {
-              specialty.physicians = response.data._embedded.physicians
-            } else {
-              specialty.physicians = []
-            }
-          })
+          Specialties.populatePhysicians(specialty)
           .catch(function(error) {
             scope.querying = false
             $mdDialog.show($mdDialog.alert().title(':(')
@@ -148,16 +136,16 @@
           scope.editingSpecialty = false
           scope.querying = true
 
-          var promise
+          var specialtiesPromise
           if (specialty._links) {
             // editing object from tjhe back end
-            promise = $http.put(specialty._links.self.href, specialty)
+            specialtiesPromise = Specialties.update(specialty)
           } else {
             // new object
-            promise = $http.post('/specialties', specialty)
+            specialtiesPromise = Specialties.create(specialty)
           }
 
-          promise.then(function(response) {
+          specialtiesPromise.then(function(response) {
             scope.querying = false
             querySpecialties(0)
           })

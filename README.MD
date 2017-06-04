@@ -20,7 +20,8 @@ interface to the database. The only notable features are:
 
 ### Tests
 
-Running "mvn package" will run the tests
+
+Run "mvn package" on the project root.
 
 ### Possible improvements
 
@@ -43,19 +44,21 @@ text search to avoid a large combo box.
 
 CPF validation is powered by [ng-cpf-cnpj](https://github.com/gil/ng-cpf-cnpj).
 
+The web app source is in src/main/resources/static/
+
 ### Possible improvements
 
 * Use a packaging system, such as Webpack
+* Create a git repository for the web app, and include it in the backent 
+  through a git submodule  
 * Move the pagination controls to it's own directive, or use a ready made lib.
 * Add icons to the listings (phone, etc).
 * Maybe force the "create" FAB to the bottom of the page
 * Create a "details" page for specialties, since it's physician list can become
   convoluted.
-* More tests.
 * Double check responsive layout.
 
 ## What I learned on this project
 
 Spring Boot and Heroku (first time I used either tech). I was very pleased with
 Heroku's simplicity, and with Spring Boot's code generation capabilities. 
-

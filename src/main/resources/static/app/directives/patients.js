@@ -9,7 +9,7 @@
     return {
       restrict: 'E',
       replace: false,
-      templateUrl: '../templates/patients.html',
+      templateUrl: 'app/templates/patients.html',
       link: function (scope) {
         scope.editingPatient = false  // togle FAB
         scope.page = 0                // pagination controls
@@ -19,9 +19,9 @@
         scope.sort = {
           field: 'name',              // sorting field
           direction: 'asc',           // sort direction for REST query
-          directionUi: false          // sort direction for UI list -> false == asc, true == reverse
+          directionUi: false,         // sort direction for UI list -> false == asc, true == reverse
+          iconName: 'keyboard_arrow_up'
         }
-        scope.sortIconName = 'keyboard_arrow_up'
         scope.totalElements = 0       // pagination controls
         scope.totalPages = 0          // pagination controls
 
@@ -77,27 +77,28 @@
 
         /**
           Queries backend for patients. Chooses appropriate HTTP route and query
-          atring based on sorting controls & query text
+          string based on sorting controls & query text
         */
         function queryPatients (pageDirection) {
-          scope.querying = true
           var newPage = 0
           if (typeof pageDirection === 'number') {
             newPage = scope.page + pageDirection
             newPage = Math.min(newPage, scope.totalPages - 1)
             newPage = Math.max(0, newPage)
           }
+          scope.querying = true
 
           var patientsPromise
           if (scope.queryText) {
-            patientsPromise = Patients.findByName(scope.queryText, newPage, sort)
+            patientsPromise = Patients.findByName(scope.queryText, newPage, scope.sort)
           } else {
-            patientsPromise = Patients.find(newPage, sort)
+            patientsPromise = Patients.find(newPage, scope.sort)
           }
 
           patientsPromise.then(function(response) {
             if (response.data) {
               scope.patients = response.data._embedded.persons
+
               scope.totalPages = response.data.page.totalPages
               scope.page = response.data.page.number
               scope.totalElements = response.data.page.totalElements

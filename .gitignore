@@ -1,0 +1,5 @@
+.settings/
+.project
+target/
+.classpath
+src/main/resources/static/node_modules/

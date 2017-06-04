@@ -1,8 +1,7 @@
 (function() {
   'use strict';
   /**
-    <patients> directive: displays a sortable list of patients, a query box
-    and create/edit controls.
+    Provides CRUD API access for patients.
   */
   angular.module('hexagon')
   .factory('Patients', ['$http', '$mdDialog', function($http, $mdDialog) {
@@ -16,15 +15,24 @@
       },
 
       find: function (page, sort) {
-        var url = '/persons?'
+        var url = '/persons'
         var params = fillQueryPageAndSort(page, sort)
-        return $http.get(url, params)
+        return $http({
+          method: 'GET',
+          url: url, 
+          params: params
+        })
       },
 
       findByName: function (name, page, sort) {
-        var url += '/persons/search/findByNameContaining?name='
+        var url = '/persons/search/findByNameContaining'
         var params = fillQueryPageAndSort(page, sort)
-        return $http.get(url, params)
+        params.name = name
+        return $http({
+          method: 'GET',
+          url: url, 
+          params: params
+        })
       },
 
       update: function (patient) {

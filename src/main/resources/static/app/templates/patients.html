@@ -7,12 +7,12 @@
       </md-input-container>
       
       <md-button class="md-icon-button" aria-label="Previous" ng-click="toggleSortDirection()">
-        <md-icon>{{ sortIconName }}</md-icon>
+        <md-icon>{{ sort.iconName }}</md-icon>
       </md-button>
     </div>
 
     <md-list flex layout-align="space-around none">
-      <md-list-item class="md-3-line" ng-repeat="patient in patients  | orderBy:'name':sortDirectionUi ">
+      <md-list-item class="md-3-line" ng-repeat="patient in patients  | orderBy:'name':sort.directionUi ">
         <div class="md-list-item-text" layout="column">
           <h3>{{ patient.name }}</h3>
           <h4>{{ patient.cpf }}</h4>
@@ -28,7 +28,7 @@
       </md-list-item>
     </md-list>
 
-    <div layout="row"  layout-align="center center" ng-if="totalPages > 0">
+    <div layout="row" layout-align="center center" ng-if="totalPages > 0">
       <md-button class="md-icon-button" aria-label="Previous" ng-click="navigatePrevious()" ng-disabled="page <= 0">
         <md-icon>navigate_before</md-icon>
       </md-button>
@@ -38,7 +38,7 @@
       <md-button class="md-icon-button" aria-label="Next" ng-click="navigateNext()" ng-disabled="page >= (totalPages - 1)">
         <md-icon>navigate_next</md-icon>
       </md-button>
-    </div>    
+    </div>
   </div>
 
   <div layout="row" layout-align="center end" ng-if="!editingPatient">
